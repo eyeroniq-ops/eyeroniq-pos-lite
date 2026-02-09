@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("STAFF") // ADMIN, STAFF
+  permissions String? // JSON string: "['sales', 'products', 'reports']"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sales     Sale[]
+  expenses  Expense[]
+  appointments Appointment[]
+}
+
+model Client {
+  id           String        @id @default(uuid())
+  name         String
+  phone        String?
+  email        String?
+  address      String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  sales        Sale[]
+  appointments Appointment[]
+}
+
+model Product {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  barcode     String?    @unique // Optional barcode for scanning
+  type        String     @default("PRODUCT") // PRODUCT, SERVICE
+  price       Float
+  cost        Float      @default(0)
+  stock       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  saleItems   SaleItem[]
+}
+
+model Sale {
+  id            Int        @id @default(autoincrement())
+  type          String     @default("SALE") // SALE, QUOTE
+  total         Float
+  paymentMethod String     @default("CASH") // CASH, CARD, TRANSFER
+  status        String     @default("COMPLETED") // COMPLETED, PENDING, CANCELLED
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  userId        String?
+  user          User?      @relation(fields: [userId], references: [id])
+  
+  clientId      String?
+  client        Client?    @relation(fields: [clientId], references: [id])
+  
+  items         SaleItem[]
+}
+
+model SaleItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  price     Float   // Price at time of sale
+  
+  saleId    Int
+  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  description String
+  amount      Float
+  category    String?
+  date        DateTime @default(now())
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  title     String   @default("Cita")
+  date      DateTime
+  notes     String?
+  status    String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
+  
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Settings {
+  id            String   @id @default("default")
+  storeName     String   @default("EYERONIQ POS")
+  storeAddress  String?
+  storePhone    String?
+  storeLogoUrl  String?
+  receiptFooter String?  @default("GRACIAS POR SU COMPRA")
+  
+  // Printer Config
+  printerType   String   @default("THERMAL") // THERMAL, PDF_ONLY
+  printerWidth  Int      @default(80)        // 58, 80
+  
+  updatedAt     DateTime @updatedAt
+}

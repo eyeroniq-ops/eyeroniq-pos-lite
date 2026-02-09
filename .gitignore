@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+dev.db
+last_receipt.bin
+
+# build & transfer
+next_build.tar.gz
+transfer.tar
+*.tar.gz
+
+# config backups
+nginx_pos.conf
+
+certificates
+public/uploads/
