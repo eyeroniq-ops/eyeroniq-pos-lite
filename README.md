@@ -25,6 +25,23 @@ The system is configured to work as a standalone Wi-Fi access point.
     pm2 status pos
     ```
 
+### 🛰️ Hotspot Configuration (Technical)
+
+If you are setting up a new Orange Pi, follow these steps to configure the access point:
+
+1.  **Create Hotspot**:
+    ```bash
+    nmcli con add type wifi ifname wlan0 con-name Hotspot autoconnect yes ssid "eyeroniq PoS Lite"
+    nmcli con modify Hotspot 802-11-wireless.mode hotspot 802-11-wireless.band bg
+    nmcli con modify Hotspot ipv4.method shared
+    ```
+2.  **Activate**:
+    ```bash
+    nmcli con up Hotspot
+    ```
+3.  **Local Redirect (Optional)**:
+    Ensure Nginx is listening on port 80 and proxying to port 3000 for easy access via IP.
+
 ## 🛠 Tech Stack
 
 - **Framework**: Next.js 16 (Turbopack)
